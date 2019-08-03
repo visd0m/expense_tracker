@@ -3,7 +3,6 @@
 Personal tool I use to map bank accounts reports and upload them to a google spreadsheet.
 
 ## Warning
-___
 
 **the project is a personal tool**
 
@@ -15,7 +14,6 @@ Handled bank accounts
 - widiba
 
 ## Highlight of the project
----
 
 - The script is configurable using a json file `config/config.json`
 ```
@@ -52,7 +50,6 @@ Handled bank accounts
 - `{:goth, "~> 1.1"}` is used to authenticate `{:google_api_sheets, "~> 0.7.0"}` requests through oauth2.
 
 ## How to run
----
 
 To run the script, log into iex loading the mix project
 ```
