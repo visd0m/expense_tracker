@@ -4,7 +4,7 @@ defmodule ReportFile do
 
   @type t :: %ReportFile{
           file_path: String.t(),
-          source: atom(),
-          owner: atom()
+          source: String.t(),
+          owner: String.t()
         }
 end
