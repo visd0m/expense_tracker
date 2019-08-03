@@ -81,7 +81,7 @@ defmodule Expense do
           case lang do
             :ita ->
               case String.downcase(month_name) do
-                "geb" -> "01"
+                "gen" -> "01"
                 "feb" -> "02"
                 "mar" -> "03"
                 "apr" -> "04"
