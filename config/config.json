@@ -1,0 +1,25 @@
+{
+  "spreadsheet_id": "1Qwghz4hUIXcDatssv5b0kA0uL5Spf7iGVzpevLaMZlM",
+  "report_files": [
+    {
+      "file_path": "/Users/domenicovisconti/Desktop/export/Revolut-EUR-Statement-1 May 2019 to 31 May 2019.csv",
+      "source": "revolut",
+      "owner": "SARA"
+    },
+    {
+      "file_path": "/Users/domenicovisconti/Desktop/export/Revolut-EUR-Statement-mag 2019.csv",
+      "source": "revolut",
+      "owner": "DOMENICO"
+    },
+    {
+      "file_path": "/Users/domenicovisconti/Desktop/export/ListaMovimentiConto.csv",
+      "source": "sella",
+      "owner": "DOMENICO"
+    },
+    {
+      "file_path": "/Users/domenicovisconti/Desktop/export/I miei movimenti conto.xlsx",
+      "source": "widiba",
+      "owner": "DOMENICO"
+    }
+  ]
+}
