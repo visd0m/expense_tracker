@@ -30,7 +30,7 @@ defmodule ExpenseTracker do
 
       category =
         cond do
-          String.contains?(description, "SATISPAY S.P.A.") -> "STIPENDIO"
+          String.contains?(description, "SATISPAY S.P.A.") -> "STIPENDIO_DOME"
           String.contains?(description, "FASTWEB") -> "BOLLETTE"
           String.contains?(description, "AFFITTO IMMOBILE") -> "AFFITTO"
           true -> "EXTRA"
