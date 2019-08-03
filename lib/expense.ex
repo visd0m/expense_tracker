@@ -89,7 +89,7 @@ defmodule Expense do
                 "giu" -> "06"
                 "lug" -> "07"
                 "ago" -> "08"
-                "aet" -> "09"
+                "set" -> "09"
                 "ott" -> "10"
                 "nov" -> "11"
                 "dic" -> "12"
