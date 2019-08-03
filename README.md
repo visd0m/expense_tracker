@@ -13,6 +13,19 @@ Handled bank accounts
 - sella
 - widiba
 
+## What problem it solves?
+
+I have more than one bank account, my expenses are spread through them.
+My girlfirend has another bank account.
+
+We would like to aggregate our expesnes in a single place in order to be able to check an monitor them.
+
+We chose google spreadsheet to aggregate expenses, beacuse it has different clients (mobile/web) and it is easy to use and edit manually if needed.
+
+Given the bank accounts report, this script map them into a model we choose to use to represent expenses on the spreadsheet, and uplaod the expenses to the google spreadsheet.
+
+The process is not yet fully automated, because I have to run manually the script after I download manually the exports (not the best but I am working on making it better)
+
 ## Highlight of the project
 
 - The script is configurable using a json file `config/config.json`
