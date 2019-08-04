@@ -13,7 +13,7 @@ Handled bank accounts
 - sella
 - widiba
 
-## What problem it solves?
+## What problem does it solve?
 
 I have more than one bank account, my expenses are spread through them.
 My girlfirend has another bank account.
