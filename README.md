@@ -18,7 +18,7 @@ Handled bank accounts
 I have more than one bank account, my expenses are spread through them.
 My girlfirend has another bank account.
 
-We would like to aggregate our expesnes in a single place in order to be able to check an monitor them.
+We would like to aggregate our expesnes in a single place in order to be able to check and monitor them.
 
 We chose google spreadsheet to aggregate expenses, beacuse it has different clients (mobile/web) and it is easy to use and edit manually if needed.
 
