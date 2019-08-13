@@ -11,6 +11,8 @@ defmodule Expense do
   ]
   defstruct [:date, :amount, :category, :detail, :owner, :import_session_id, :metadata, :source]
 
+  @revolut_handled_categories ["transport", "restaurants", "groceries", "health", "shopping"]
+
   @type t :: %Expense{
           date: Date.t(),
           amount: Float.t(),
@@ -21,74 +23,6 @@ defmodule Expense do
           source: String.t(),
           metadata: map()
         }
-
-  defp revolut_get_category_and_detail(%{
-         "Description" => description,
-         "Category" => category
-       }) do
-    detail = String.downcase(description)
-
-    category =
-      case category do
-        "transport" ->
-          :transport
-
-        "restaurants" ->
-          :restaurants
-
-        "groceries" ->
-          :groceries
-
-        "health" ->
-          :health
-
-        "shopping" ->
-          :shopping
-
-        _ ->
-          detail = detail |> String.downcase()
-
-          cond do
-            String.contains?(detail, "top-up") -> :revolut_topup
-            true -> :extra
-          end
-      end
-
-    {category, detail}
-  end
-
-  defp revolut_get_category_and_detail(%{
-         "Category" => category,
-         "Reference" => reference
-       }) do
-    detail = String.downcase(reference)
-
-    category =
-      case category do
-        "transport" ->
-          :transport
-
-        "restaurants" ->
-          :restaurants
-
-        "groceries" ->
-          :groceries
-
-        "health" ->
-          :health
-
-        "shopping" ->
-          :shopping
-
-        _ ->
-          cond do
-            String.contains?(detail, "top-up") -> :revolut_topup
-            true -> :extra
-          end
-      end
-
-    {category, detail}
-  end
 
   @spec parse_expense(
           list() | map(),
@@ -220,6 +154,31 @@ defmodule Expense do
   end
 
   ###
+
+  defp revolut_get_category_and_detail(%{
+         "Description" => description,
+         "Category" => category
+       }) do
+    revolut_get_category_and_detail(description, category)
+  end
+
+  defp revolut_get_category_and_detail(%{
+         "Category" => category,
+         "Reference" => reference
+       }) do
+    revolut_get_category_and_detail(reference, category)
+  end
+
+  defp revolut_get_category_and_detail(detail, category) do
+    if Enum.member?(@revolut_handled_categories, category) do
+      {String.to_existing_atom(category), detail}
+    else
+      cond do
+        String.contains?(detail, "top-up") -> {:revolut_topup, detail}
+        true -> {:extra, detail}
+      end
+    end
+  end
 
   @spec parse_amount(String.t(), Keyword.t()) :: Float.t()
   def parse_amount(amount_as_string, options \\ []) do
