@@ -1,5 +1,14 @@
 defmodule Expense do
-  @enforce_keys [:date, :amount, :category, :detail, :owner, :import_session_id, :metadata, :source]
+  @enforce_keys [
+    :date,
+    :amount,
+    :category,
+    :detail,
+    :owner,
+    :import_session_id,
+    :metadata,
+    :source
+  ]
   defstruct [:date, :amount, :category, :detail, :owner, :import_session_id, :metadata, :source]
 
   @type t :: %Expense{
@@ -12,6 +21,205 @@ defmodule Expense do
           source: String.t(),
           metadata: map()
         }
+
+  defp revolut_get_category_and_detail(%{
+         "Description" => description,
+         "Category" => category
+       }) do
+    detail = String.downcase(description)
+
+    category =
+      case category do
+        "transport" ->
+          :transport
+
+        "restaurants" ->
+          :restaurants
+
+        "groceries" ->
+          :groceries
+
+        "health" ->
+          :health
+
+        "shopping" ->
+          :shopping
+
+        _ ->
+          detail = detail |> String.downcase()
+
+          cond do
+            String.contains?(detail, "top-up") -> :revolut_topup
+            true -> :extra
+          end
+      end
+
+    {category, detail}
+  end
+
+  defp revolut_get_category_and_detail(%{
+         "Category" => category,
+         "Reference" => reference
+       }) do
+    detail = String.downcase(reference)
+
+    category =
+      case category do
+        "transport" ->
+          :transport
+
+        "restaurants" ->
+          :restaurants
+
+        "groceries" ->
+          :groceries
+
+        "health" ->
+          :health
+
+        "shopping" ->
+          :shopping
+
+        _ ->
+          cond do
+            String.contains?(detail, "top-up") -> :revolut_topup
+            true -> :extra
+          end
+      end
+
+    {category, detail}
+  end
+
+  @spec parse_expense(
+          list() | map(),
+          :revolut | :sella | :widiba,
+          String.t(),
+          UUID.t()
+        ) :: Expense.t()
+  def parse_expense(expense, source, owner, import_session_id)
+
+  ## revolut
+
+  def parse_expense(
+        revolut_record = %{
+          "Completed Date" => date,
+          "Paid Out (EUR)" => paid_out,
+          "Paid In (EUR)" => paid_in,
+          "Exchange Out" => _exchange_out,
+          "Exchange In" => _exchange_in,
+          "Balance (EUR)" => _balance
+        },
+        :revolut,
+        owner,
+        import_session_id
+      ) do
+    amount =
+      if paid_out != "",
+        do: Expense.parse_amount(paid_out) * -1,
+        else: Expense.parse_amount(paid_in)
+
+    options =
+      case owner do
+        "sara" -> [format: "MMM dd", lang: :eng]
+        "domenico" -> [format: "dd MMM yyyy", lang: :ita]
+      end
+
+    {category, detail} = revolut_get_category_and_detail(revolut_record)
+
+    %Expense{
+      amount: amount,
+      category:
+        category
+        |> Atom.to_string()
+        |> String.upcase(),
+      detail: detail,
+      date: date |> Expense.parse_date(options),
+      owner: owner,
+      metadata: %{csv: revolut_record},
+      import_session_id: import_session_id,
+      source: "REVOLUT"
+    }
+  end
+
+  ## sella
+
+  def parse_expense(
+        sella_record = %{
+          "Codice identificativo" => _id,
+          "Data Contabile" => date,
+          "Data valuta" => _another_date,
+          "Descrizione" => description,
+          "Divisa" => _currency,
+          "Importo" => amount
+        },
+        :sella,
+        owner,
+        import_session_id
+      ) do
+    description = String.downcase(description)
+
+    category =
+      cond do
+        String.contains?(description, "satispay s.p.a.") -> :salary_domenico
+        String.contains?(description, "fastweb") -> :bills
+        String.contains?(description, "estra") -> :bills
+        String.contains?(description, "affitto immobile") -> :rent
+        true -> :extra
+      end
+
+    %Expense{
+      amount: amount |> Expense.parse_amount(),
+      category:
+        category
+        |> Atom.to_string()
+        |> String.upcase(),
+      detail: description |> String.downcase(),
+      date: date |> Expense.parse_date(format: "dd/MM/yyyy"),
+      owner: owner,
+      metadata: %{csv: sella_record},
+      import_session_id: import_session_id,
+      source: "SELLA"
+    }
+  end
+
+  ## widiba
+
+  def parse_expense(
+        xls_record = [_ | [date | [_ | [detail | [amount | _]]]]],
+        :widiba,
+        owner,
+        import_session_id
+      ) do
+    description = String.downcase(detail)
+
+    category =
+      cond do
+        String.contains?(description, "accredito") ->
+          :widiba_topup
+
+        String.contains?(description, "addebito") && String.contains?(description, "satispay") ->
+          :satispay_topup
+
+        true ->
+          :extra
+      end
+
+    %Expense{
+      amount: amount,
+      category:
+        category
+        |> Atom.to_string()
+        |> String.upcase(),
+      detail: detail |> String.downcase(),
+      date: date,
+      owner: owner,
+      metadata: %{xls: xls_record},
+      import_session_id: import_session_id,
+      source: "WIDIBA"
+    }
+  end
+
+  ###
 
   @spec parse_amount(String.t(), Keyword.t()) :: Float.t()
   def parse_amount(amount_as_string, options \\ []) do
