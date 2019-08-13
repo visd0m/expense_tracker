@@ -11,14 +11,6 @@ defmodule Expense do
   ]
   defstruct [:date, :amount, :category, :detail, :owner, :import_session_id, :metadata, :source]
 
-  @revolut_handled_categories %{
-    "transport" => :transport,
-    "restaurants" => :restaurants,
-    "groceries" => :groceries,
-    "health" => :health,
-    "shopping" => :shopping
-  }
-
   @type t :: %Expense{
           date: Date.t(),
           amount: Float.t(),
@@ -29,6 +21,78 @@ defmodule Expense do
           source: String.t(),
           metadata: map()
         }
+
+  @spec revolut_category_handler(String.t(), String.t()) ::
+          {:transport
+           | :restaurants
+           | :groceries
+           | :health
+           | :shopping
+           | :extra
+           | :revolut_topup, String.t()}
+  defp revolut_category_handler(detail, category) do
+    case category do
+      "transport" ->
+        {:transport, detail}
+
+      "restaurants" ->
+        {:restaurants, detail}
+
+      "groceries" ->
+        {:groceries, detail}
+
+      "health" ->
+        {:health, detail}
+
+      "shopping" ->
+        {:shopping, detail}
+
+      _ ->
+        cond do
+          String.contains?(detail, "top-up") -> {:revolut_topup, detail}
+          true -> {:extra, detail}
+        end
+    end
+  end
+
+  defp revolut_get_category_and_detail(%{
+         "Description" => description,
+         "Category" => category
+       }) do
+    revolut_category_handler(description, category)
+  end
+
+  defp revolut_get_category_and_detail(%{
+         "Category" => category,
+         "Reference" => reference
+       }) do
+    revolut_category_handler(reference, category)
+  end
+
+  @spec sella_category_handler(String.t()) :: :salary_domenico | :bills | :rent
+  defp sella_category_handler(description) do
+    cond do
+      String.contains?(description, "satispay s.p.a.") -> :salary_domenico
+      String.contains?(description, "fastweb") -> :bills
+      String.contains?(description, "estra") -> :bills
+      String.contains?(description, "affitto immobile") -> :rent
+      true -> :extra
+    end
+  end
+
+  @spec widiba_category_handler(String.t()) :: :widiba_topup | :satispay_topup | :extra
+  defp widiba_category_handler(description) do
+    cond do
+      String.contains?(description, "accredito") ->
+        :widiba_topup
+
+      String.contains?(description, "addebito") && String.contains?(description, "satispay") ->
+        :satispay_topup
+
+      true ->
+        :extra
+    end
+  end
 
   @spec parse_expense(
           list() | map(),
@@ -98,19 +162,10 @@ defmodule Expense do
       ) do
     description = String.downcase(description)
 
-    category =
-      cond do
-        String.contains?(description, "satispay s.p.a.") -> :salary_domenico
-        String.contains?(description, "fastweb") -> :bills
-        String.contains?(description, "estra") -> :bills
-        String.contains?(description, "affitto immobile") -> :rent
-        true -> :extra
-      end
-
     %Expense{
       amount: amount |> Expense.parse_amount(),
       category:
-        category
+        sella_category_handler(description)
         |> Atom.to_string()
         |> String.upcase(),
       detail: description |> String.downcase(),
@@ -132,22 +187,10 @@ defmodule Expense do
       ) do
     description = String.downcase(detail)
 
-    category =
-      cond do
-        String.contains?(description, "accredito") ->
-          :widiba_topup
-
-        String.contains?(description, "addebito") && String.contains?(description, "satispay") ->
-          :satispay_topup
-
-        true ->
-          :extra
-      end
-
     %Expense{
       amount: amount,
       category:
-        category
+        widiba_category_handler(description)
         |> Atom.to_string()
         |> String.upcase(),
       detail: detail |> String.downcase(),
@@ -160,31 +203,6 @@ defmodule Expense do
   end
 
   ###
-
-  defp revolut_get_category_and_detail(%{
-         "Description" => description,
-         "Category" => category
-       }) do
-    revolut_get_category_and_detail(description, category)
-  end
-
-  defp revolut_get_category_and_detail(%{
-         "Category" => category,
-         "Reference" => reference
-       }) do
-    revolut_get_category_and_detail(reference, category)
-  end
-
-  defp revolut_get_category_and_detail(detail, category) do
-    if Enum.member?(Map.keys(@revolut_handled_categories), category) do
-      {Map.get(@revolut_handled_categories, category), detail}
-    else
-      cond do
-        String.contains?(detail, "top-up") -> {:revolut_topup, detail}
-        true -> {:extra, detail}
-      end
-    end
-  end
 
   @spec parse_amount(String.t(), Keyword.t()) :: Float.t()
   def parse_amount(amount_as_string, options \\ []) do
