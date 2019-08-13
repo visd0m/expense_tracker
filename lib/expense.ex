@@ -11,7 +11,13 @@ defmodule Expense do
   ]
   defstruct [:date, :amount, :category, :detail, :owner, :import_session_id, :metadata, :source]
 
-  @revolut_handled_categories ["transport", "restaurants", "groceries", "health", "shopping"]
+  @revolut_handled_categories %{
+    "transport" => :transport,
+    "restaurants" => :restaurants,
+    "groceries" => :groceries,
+    "health" => :health,
+    "shopping" => :shopping
+  }
 
   @type t :: %Expense{
           date: Date.t(),
@@ -170,8 +176,8 @@ defmodule Expense do
   end
 
   defp revolut_get_category_and_detail(detail, category) do
-    if Enum.member?(@revolut_handled_categories, category) do
-      {String.to_existing_atom(category), detail}
+    if Enum.member?(Map.keys(@revolut_handled_categories), category) do
+      {Map.get(@revolut_handled_categories, category), detail}
     else
       cond do
         String.contains?(detail, "top-up") -> {:revolut_topup, detail}
