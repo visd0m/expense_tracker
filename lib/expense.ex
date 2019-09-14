@@ -12,24 +12,27 @@ defmodule Expense do
   defstruct [:date, :amount, :category, :detail, :owner, :import_session_id, :metadata, :source]
 
   @type t :: %Expense{
-          date: Date.t(),
-          amount: Float.t(),
-          category: String.t(),
-          detail: String.t(),
-          owner: String.t(),
-          import_session_id: UUID.t(),
-          source: String.t(),
-          metadata: map()
-        }
+               date: Date.t(),
+               amount: Float.t(),
+               category: String.t(),
+               detail: String.t(),
+               owner: String.t(),
+               import_session_id: UUID.t(),
+               source: String.t(),
+               metadata: map()
+             }
 
   @spec revolut_category_handler(String.t(), String.t()) ::
-          {:transport
-           | :restaurants
-           | :groceries
-           | :health
-           | :shopping
-           | :extra
-           | :revolut_topup, String.t()}
+          {
+            :transport
+            | :restaurants
+            | :groceries
+              | :health
+              | :shopping
+                | :extra
+                | :revolut_topup,
+            String.t()
+          }
   defp revolut_category_handler(detail, category) do
     case category do
       "transport" ->
@@ -55,17 +58,21 @@ defmodule Expense do
     end
   end
 
-  defp revolut_get_category_and_detail(%{
-         "Description" => description,
-         "Category" => category
-       }) do
+  defp revolut_get_category_and_detail(
+         %{
+           "Description" => description,
+           "Category" => category
+         }
+       ) do
     revolut_category_handler(description, category)
   end
 
-  defp revolut_get_category_and_detail(%{
-         "Category" => category,
-         "Reference" => reference
-       }) do
+  defp revolut_get_category_and_detail(
+         %{
+           "Category" => category,
+           "Reference" => reference
+         }
+       ) do
     revolut_category_handler(reference, category)
   end
 
@@ -119,8 +126,8 @@ defmodule Expense do
       ) do
     amount =
       if paid_out != "",
-        do: Expense.parse_amount(paid_out) * -1,
-        else: Expense.parse_amount(paid_in)
+         do: Expense.parse_amount(paid_out) * -1,
+         else: Expense.parse_amount(paid_in)
 
     options =
       case owner do
@@ -137,9 +144,12 @@ defmodule Expense do
         |> Atom.to_string()
         |> String.upcase(),
       detail: detail,
-      date: date |> Expense.parse_date(options),
+      date: date
+            |> Expense.parse_date(options),
       owner: owner,
-      metadata: %{csv: revolut_record},
+      metadata: %{
+        csv: revolut_record
+      },
       import_session_id: import_session_id,
       source: "REVOLUT"
     }
@@ -163,15 +173,20 @@ defmodule Expense do
     description = String.downcase(description)
 
     %Expense{
-      amount: amount |> Expense.parse_amount(),
+      amount: amount
+              |> Expense.parse_amount(),
       category:
         sella_category_handler(description)
         |> Atom.to_string()
         |> String.upcase(),
-      detail: description |> String.downcase(),
-      date: date |> Expense.parse_date(format: "dd/MM/yyyy"),
+      detail: description
+              |> String.downcase(),
+      date: date
+            |> Expense.parse_date(format: "dd/MM/yyyy"),
       owner: owner,
-      metadata: %{csv: sella_record},
+      metadata: %{
+        csv: sella_record
+      },
       import_session_id: import_session_id,
       source: "SELLA"
     }
@@ -193,10 +208,13 @@ defmodule Expense do
         widiba_category_handler(description)
         |> Atom.to_string()
         |> String.upcase(),
-      detail: detail |> String.downcase(),
+      detail: detail
+              |> String.downcase(),
       date: date,
       owner: owner,
-      metadata: %{xls: xls_record},
+      metadata: %{
+        xls: xls_record
+      },
       import_session_id: import_session_id,
       source: "WIDIBA"
     }
@@ -252,7 +270,7 @@ defmodule Expense do
                 "may" -> "05"
                 "june" -> "06"
                 "july" -> "07"
-                "aug" -> "08"
+                "august" -> "08"
                 "sep" -> "09"
                 "oct" -> "10"
                 "nov" -> "11"

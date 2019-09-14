@@ -4,25 +4,29 @@ defmodule ExpenseUploader do
   def upload_expenses(expenses, spreadsheet_id) do
     expenses =
       expenses
-      |> Enum.map(fn expense ->
-        [
-          Date.to_iso8601(expense.date),
-          expense.amount,
-          expense.category,
-          expense.detail,
-          expense.owner,
-          expense.source,
-          expense.import_session_id,
-          Poison.encode!(expense.metadata)
-        ]
-      end)
+      |> Enum.map(
+           fn expense ->
+             [
+               Date.to_iso8601(expense.date),
+               expense.amount,
+               expense.category,
+               expense.detail,
+               expense.owner,
+               expense.source,
+               expense.import_session_id,
+               Poison.encode!(expense.metadata)
+             ]
+           end
+         )
 
     connection =
-      GoogleApi.Sheets.V4.Connection.new(fn scopes ->
-        Goth.Token.for_scope(Enum.join(scopes, " "))
-        |> elem(1)
-        |> Map.get(:token)
-      end)
+      GoogleApi.Sheets.V4.Connection.new(
+        fn scopes ->
+          Goth.Token.for_scope(Enum.join(scopes, " "))
+          |> elem(1)
+          |> Map.get(:token)
+        end
+      )
 
     GoogleApi.Sheets.V4.Api.Spreadsheets.sheets_spreadsheets_values_append(
       connection,
