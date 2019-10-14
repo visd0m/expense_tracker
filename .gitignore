@@ -24,3 +24,8 @@ expense_tracker-*.tar
 
 /config/ExpenseTracker-2407c275b56d.json
 /.elixir_ls/**
+
+config/reports/**
+
+.idea/**
+*.iml

@@ -2,22 +2,22 @@
   "spreadsheet_id": "11nvtF9XQOJIz0KSpJtGRmsIA0bks-VNJ3HoyrNcdBv4",
   "report_files": [
     {
-      "file_path": "/Users/domenico/Documents/exports/Revolut-EUR-Statement-1 Aug 2019 to 31 Aug 2019.csv",
+      "file_path": "../config/reports/Revolut-EUR-Statement-1 Sep 2019 to 30 Sep 2019.csv",
       "source": "revolut",
       "owner": "SARA"
     },
     {
-      "file_path": "/Users/domenico/Documents/exports/Revolut-EUR-Statement-ago 2019.csv",
+      "file_path": "../config/reports/Revolut-EUR-Statement-set 2019.csv",
       "source": "revolut",
       "owner": "DOMENICO"
     },
     {
-      "file_path": "/Users/domenico/Documents/exports/ListaMovimentiConto.csv",
+      "file_path": "../config/reports/ListaMovimentiConto.csv",
       "source": "sella",
       "owner": "DOMENICO"
     },
     {
-      "file_path": "/Users/domenico/Documents/exports/I miei movimenti conto.xlsx",
+      "file_path": "../config/reports/I miei movimenti conto.xlsx",
       "source": "widiba",
       "owner": "DOMENICO"
     }

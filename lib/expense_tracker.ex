@@ -6,10 +6,11 @@ defmodule ExpenseTracker do
 
     import_session_id = UUID.uuid4()
 
-    expenses = Enum.flat_map(
-      configuration.report_files,
-      &handle_report(import_session_id, &1)
-    )
+    expenses =
+      Enum.flat_map(
+        configuration.report_files,
+        &handle_report(import_session_id, &1)
+      )
 
     ExpenseUploader.upload_expenses(expenses, configuration.spreadsheet_id)
   end
@@ -28,14 +29,14 @@ defmodule ExpenseTracker do
     |> Enum.filter(&(elem(&1, 0) == :ok))
     |> Enum.map(&elem(&1, 1))
     |> Enum.map(
-         &Expense.parse_expense(
-           &1,
-           :sella,
-           owner
-           |> String.downcase(),
-           import_session_id
-         )
-       )
+      &Expense.parse_expense(
+        &1,
+        :sella,
+        owner
+        |> String.downcase(),
+        import_session_id
+      )
+    )
     |> Enum.into([])
   end
 
@@ -51,14 +52,14 @@ defmodule ExpenseTracker do
     |> CSV.decode(separator: ?;, headers: true, strip_fields: true)
     |> Enum.map(&elem(&1, 1))
     |> Enum.map(
-         &Expense.parse_expense(
-           &1,
-           :revolut,
-           owner
-           |> String.downcase(),
-           import_session_id
-         )
-       )
+      &Expense.parse_expense(
+        &1,
+        :revolut,
+        owner
+        |> String.downcase(),
+        import_session_id
+      )
+    )
     |> Enum.into([])
   end
 
@@ -71,23 +72,21 @@ defmodule ExpenseTracker do
     file_path
     |> Path.expand(__DIR__)
     |> Xlsxir.stream_list(0)
-    |> Enum.map(
-         fn xls_record ->
-           xls_record
-           |> Enum.filter(fn item -> item != nil end)
-           |> Enum.into([])
-         end
-       )
+    |> Enum.map(fn xls_record ->
+      xls_record
+      |> Enum.filter(fn item -> item != nil end)
+      |> Enum.into([])
+    end)
     |> Enum.filter(&(Enum.count(&1) == 5))
     |> Enum.map(
-         &Expense.parse_expense(
-           &1,
-           :widiba,
-           owner
-           |> String.downcase(),
-           import_session_id
-         )
-       )
+      &Expense.parse_expense(
+        &1,
+        :widiba,
+        owner
+        |> String.downcase(),
+        import_session_id
+      )
+    )
     |> Enum.into([])
   end
 end
