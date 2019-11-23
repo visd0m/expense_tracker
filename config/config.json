@@ -2,12 +2,12 @@
   "spreadsheet_id": "11nvtF9XQOJIz0KSpJtGRmsIA0bks-VNJ3HoyrNcdBv4",
   "report_files": [
     {
-      "file_path": "../config/reports/Revolut-EUR-Statement-1 Sep 2019 to 30 Sep 2019.csv",
+      "file_path": "../config/reports/Revolut-EUR-Statement-1 Oct 2019 to 31 Oct 2019.csv",
       "source": "revolut",
       "owner": "SARA"
     },
     {
-      "file_path": "../config/reports/Revolut-EUR-Statement-set 2019.csv",
+      "file_path": "../config/reports/Revolut-EUR-Statement-ott 2019.csv",
       "source": "revolut",
       "owner": "DOMENICO"
     },
