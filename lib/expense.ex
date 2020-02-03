@@ -34,14 +34,23 @@ defmodule Expense do
             String.t()
           }
   defp revolut_category_handler(detail, category) do
-    case category do
+    case String.downcase(category) do
       "transport" ->
+        {:transport, detail}
+
+      "trasporti" ->
         {:transport, detail}
 
       "restaurants" ->
         {:restaurants, detail}
 
+      "ristoranti" ->
+        {:restaurants, detail}
+
       "groceries" ->
+        {:groceries, detail}
+
+      "spesa" ->
         {:groceries, detail}
 
       "health" ->
@@ -128,7 +137,7 @@ defmodule Expense do
 
     options =
       case owner do
-        "sara" -> [format: "MMM dd", lang: :eng]
+        "sara" -> [format: "dd MMM", lang: :eng]
         "domenico" -> [format: "dd MMM yyyy", lang: :ita]
       end
 
@@ -258,14 +267,14 @@ defmodule Expense do
       %{format: "yyyy-MM-dd", lang: _} ->
         Date.from_iso8601!(date_as_string)
 
-      %{format: "MMM dd", lang: lang} ->
-        [month_name, day] = String.split(date_as_string, " ")
+      %{format: "dd MMM", lang: lang} ->
+        date_tokens = String.split(date_as_string, " ")
 
         month_number =
           case lang do
             :eng ->
-              case String.downcase(month_name) do
-                "jan" -> "01"
+              case String.downcase(Enum.at(date_tokens, 1)) do
+                "january" -> "01"
                 "feb" -> "02"
                 "mar" -> "03"
                 "apr" -> "04"
@@ -283,7 +292,7 @@ defmodule Expense do
               raise RuntimeError, "unhandled lang=#{lang}"
           end
 
-        Date.from_iso8601!("2019-#{month_number}-#{String.pad_leading(day, 2, "0")}")
+        Date.from_iso8601!("2019-#{month_number}-#{String.pad_leading(Enum.at(date_tokens, 0), 2, "0")}")
 
       %{format: "dd MMM yyyy", lang: lang} ->
         [day, month_name, year] = String.split(date_as_string, " ")
